@@ -52,22 +52,10 @@ class App extends Component {
 
       weatherList: [
         {
-          day: "Today",
-          date: "xxx",
-          temp: "yyy",
-          description: "zzz"
-        },
-        {
-          day: "Today2",
-          date: "xxx",
-          temp: "yyy",
-          description: "zzz"
-        },
-        {
-          day: "Today3",
-          date: "xxx",
-          temp: "yyy",
-          description: "zzz"
+          day: "",
+          date: "",
+          temp: "",
+          description: ""
         },
       ],
       cityNamesForSuggestion: [],
@@ -79,7 +67,6 @@ class App extends Component {
 
 
   updateDetailedList = (index) => {
-    console.log(index);
     this.setState({
       detailIndex: index
     });

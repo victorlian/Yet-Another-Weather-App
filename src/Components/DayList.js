@@ -28,6 +28,8 @@ class DayList extends React.Component {
         const dateString = this.props.weather.date + " " + this.props.weather.month;
         const tempString = this.props.weather.temp + " °C"
 
+        let imgURL = "http://openweathermap.org/img/wn/" + this.props.weather.icon + "@2x.png";
+
         return (
             <List className={classes.root} onClick={() => this.props.updateDetailedList(this.props.index)}>
                 <ListItem>
@@ -41,6 +43,9 @@ class DayList extends React.Component {
                 </ListItem>
                 <ListItem>
                     <ListItemText primary={this.props.weather.main} />
+                </ListItem>
+                <ListItem>
+                    <img src = {imgURL}/> 
                 </ListItem>
             </List>
         );

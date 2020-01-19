@@ -9,7 +9,6 @@ var config = {
 
 export default {
     getWeatherForId(cityId) {
-        console.log(cityId)
         return axios.get(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&units=metric`, config)
             .then(response => {
                 return response.data;

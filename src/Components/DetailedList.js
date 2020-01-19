@@ -6,6 +6,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
+import API from '../api';
+
 const styles = theme => ({
     root: {
         width: '100%',
@@ -18,10 +20,13 @@ const styles = theme => ({
     },
 });
 
+
+
 class DetailedList extends React.Component {
     constructor(props) {
         super(props);
     }
+
 
     render() {
         const { classes } = this.props;
@@ -29,6 +34,7 @@ class DetailedList extends React.Component {
 
         const dateString = this.props.weather.date + " " + this.props.weather.month;
         const tempString = this.props.weather.min + " - " + this.props.weather.max + " °C";
+
 
         return (
             <div>
@@ -47,9 +53,6 @@ class DetailedList extends React.Component {
                     </ListItem>
                     <ListItem>
                         <ListItemText primary={this.props.weather.description} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemText primary={this.props.weather.icon} />
                     </ListItem>
                 </List>
             </div>
