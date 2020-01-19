@@ -4,13 +4,21 @@ import { withStyles } from '@material-ui/core/styles';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import Typography from '@material-ui/core/Typography';
+
 
 
 import DayList from './DayList';
 import DetailedList from './DetailedList';
 
 const styles = theme => ({
-
+  bg: {
+    background: 'black'
+  },
+  title: {
+    padding: '0 1%'
+  },
 });
 
 
@@ -20,8 +28,14 @@ class WeatherTable extends React.Component {
   }
 
   render() {
+
+    const { classes } = this.props;
+
     return (
       <div>
+        <Typography className={classes.title} variant="h6">
+          Weather forecast for XXX !@!@#$
+        </Typography>
         <Table >
           <TableBody>
             <TableRow>
@@ -33,14 +47,9 @@ class WeatherTable extends React.Component {
                 );
               })}
             </TableRow>
-
-            <TableRow>
-              <DetailedList weather={this.props.weatherList[0]} />
-            </TableRow>
-
           </TableBody>
         </Table>
-        
+        <DetailedList weather={this.props.weatherList[0]} />
       </div>
     );
   }
