@@ -12,13 +12,24 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import WeatherTable from './Components/WeatherTable';
 import AutoSuggestName from './Components/AutosuggestName';
+import API from './api';
+
+import fullCityList from "./Data/city.list.json";
+
 
 const styles = theme => ({
+  grid: {
+    background: 'black'
+  },
   button: {
     margin: theme.spacing.unit * 2,
     '&:hover': {
       backgroundColor: '#F64C72',
     }
+  },
+  errorMsg: {
+    margin: theme.spacing.unit * 2,
+    color: 'red',
   },
   pStyle: {
     fontSize: '45px',
@@ -36,6 +47,7 @@ class App extends Component {
     super(props);
     this.state = {
       name: "",
+
       weatherList: [
         {
           day: "Today",
@@ -56,35 +68,125 @@ class App extends Component {
           description: "zzz"
         },
       ],
+      cityNamesForSuggestion: [],
+      cityNameEntered: "",
+      invalid: false,
     }
   }
 
+  loadCityNames() {
+    let currentComponent = this;
 
-  // componentDidMount() {
-  //   var searchID = this.getUrlParams("searchID");
+    var cityNameList = fullCityList.map(city => {
+      var newObj = {
+        label: city.name + ", " + city.country
+      }
 
-  //   console.log(searchID);
+      return newObj;
+    });
 
-  //   if (searchID == null) {
-  //     searchID = 5;
-  //   }
 
-  //   let currentComponent = this, data;
-  //   API.getGroupsInSearch(searchID).then((response) => {
-  //     data = response;
-  //     data.forEach((element, index) => {
-  //       API.getPeopleInGroup(element.id).then((response) => {
-  //         data[index].people = response;
-  //         currentComponent.setState({
-  //           groups: data,
-  //         });
-  //       });
-  //     });
-  //   });
-  // }
+    currentComponent.setState({
+      cityNamesForSuggestion: cityNameList,
+    });
+
+
+  }
+
+  componentDidMount() {
+    this.loadCityNames();
+  }
 
   handleNameEntry = (name) => {
-    this.setState({ name: name });
+    this.setState({ cityNameEntered: name });
+
+  }
+
+  handleGetWeather = () => {
+
+    let currentComponent = this;
+
+    var id = this.getCityIdByName(this.state.cityNameEntered);
+    if (id === -1) {
+      this.setState({ invalid: true });
+      return;
+    }
+    //Now call the API with city ID
+
+    API.getWeatherForId(id).then(function (weatherResponse) {
+      let timezone = weatherResponse.city.timezone;
+
+      const fiveDayIndex = [0, 8, 16, 24, 32];  //Three hour intervals, 8 => 24 hours i.e. one day
+      var fiveDayWeatherList = fiveDayIndex.map(index => {
+        const detailedWeatherForDay = weatherResponse.list[index];
+        
+        const minMax = currentComponent.getMinMaxTemp(index, weatherResponse.list);
+        const minTemp = minMax.min;
+        const maxTemp = minMax.max;
+
+        return currentComponent.simplifyWeatherData(detailedWeatherForDay, timezone, minTemp, maxTemp);
+      })
+
+      console.log(fiveDayWeatherList);
+      currentComponent.setState({
+        invalid: false,
+        name: weatherResponse.city.name + "," + weatherResponse.city.country,
+        weatherList: fiveDayWeatherList,
+      })
+    });
+  }
+
+  getMinMaxTemp = (startingIndex, fullWeatherList) => {
+    const indexFor24Hrs = [0, 1, 2, 3, 4, 5, 6, 7];
+    const indexToFind = indexFor24Hrs.map(index => index + startingIndex);
+    const temps = indexToFind.map(index => {
+      return fullWeatherList[index].main.temp;
+    });
+
+    const minMax = {
+      min: Math.min(...temps),
+      max: Math.max(...temps)
+    }
+    return minMax;
+  }
+
+  simplifyWeatherData = (weatherData, timezone, minTemp, maxTemp) => {
+    var dateObj = new Date((weatherData.dt + timezone) * 1000);
+    const monthText = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const weekText = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+    let simplifiedData = {
+      date: dateObj.getUTCDate(),
+      month: monthText[dateObj.getUTCMonth()],
+      day: weekText[dateObj.getUTCDay()],
+      temp: Math.round(weatherData.main.temp),
+      main: weatherData.weather[0].main,
+      description: weatherData.weather[0].description,
+      min: Math.round(minTemp),
+      max: Math.round(maxTemp),
+      icon: weatherData.weather[0].icon,
+    }
+
+    return simplifiedData;
+  }
+
+  getCityIdByName = (name) => {
+    var nameSplitted = name.split(',');
+    if (nameSplitted.length !== 2) { //Invalid style
+      return -1;
+    }
+
+    var cityName = nameSplitted[0].trim();
+    var countryCode = nameSplitted[1].trim();
+
+    var cityId = -1;
+    fullCityList.forEach(city => {
+      if (city.name === cityName && city.country === countryCode) {
+        cityId = city.id;
+      }
+    });
+
+    return cityId;
   }
 
   render() {
@@ -105,21 +207,26 @@ class App extends Component {
         <h1 className={classes.pStyle}>Five Day Weather Forecast For Any City</h1>
         <div className={classes.tableContainer}>
           <Paper style={{ margin: "5%" }} >
-
             <Grid container spacing={0}>
-              <Grid item xs={2}>
-                <AutoSuggestName
-                  name={this.state.name}
+              <Grid item xs={4} >
+                < AutoSuggestName
+                  name={this.state.cityNameEntered}
                   handleNameEntry={this.handleNameEntry}
-                  personsForSuggestion={this.state.personsForSuggestion}
+                  cityNamesForSuggestion={this.state.cityNamesForSuggestion}
                 />
               </Grid>
-              <Grid item xs={2}>
-                <Button variant="contained" color="primary" className={classes.button}>
-                  Start a new search
+              <Grid item xs={3}>
+                <Button variant="contained" color="primary" className={classes.button} onClick={() => this.handleGetWeather()}>
+                  Get Weather!
                 </Button>
               </Grid>
+              <Grid item xs={3}>
+                <Typography variant="h6" className={classes.errorMsg}>
+                  {this.state.invalid ? 'Invalid city name' : ''}
+                </Typography>
+              </Grid>
             </Grid>
+
 
             <WeatherTable weatherList={this.state.weatherList} />
           </Paper >

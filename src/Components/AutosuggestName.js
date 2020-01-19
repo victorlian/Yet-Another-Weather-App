@@ -58,7 +58,6 @@ function getSuggestionValue(suggestion) {
 const styles = theme => ({
   root: {
     height: 100,
-    flexGrow: 1,
     margin: 10,
   },
   container: {
@@ -101,17 +100,17 @@ class AutoSuggestName extends React.Component {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
     let count = 0;
-  
+
     return inputLength === 0
       ? []
-      : this.props.personsForSuggestion.filter(suggestion => {
+      : this.props.cityNamesForSuggestion.filter(suggestion => {
         const keep =
           count < 5 && suggestion.label.toLowerCase().slice(0, inputLength) === inputValue;
-  
+
         if (keep) {
           count += 1;
         }
-  
+
         return keep;
       });
   }
