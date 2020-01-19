@@ -8,8 +8,9 @@ var config = {
 };
 
 export default {
+    //Needed a little hacking to solve the cors issue
     getWeatherForId(cityId) {
-        return axios.get(`https://api.openweathermap.org/data/2.5/forecast?id=${cityId}&units=metric`, config)
+        return axios.get(`https://cors-anywhere.herokuapp.com/http://api.openweathermap.org/data/2.5/forecast?id=${cityId}&units=metric`, config)
             .then(response => {
                 return response.data;
             }).catch(error => {
