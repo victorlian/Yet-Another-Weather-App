@@ -30,11 +30,12 @@ class WeatherTable extends React.Component {
   render() {
 
     const { classes } = this.props;
+    var cellIndex = 0;
 
     return (
       <div>
         <Typography className={classes.title} variant="h6">
-          Weather forecast for XXX !@!@#$
+          Weather forecast for {this.props.cityName}
         </Typography>
         <Table >
           <TableBody>
@@ -42,14 +43,14 @@ class WeatherTable extends React.Component {
               {this.props.weatherList.map(dayWeather => {
                 return (
                   <TableCell>
-                    <DayList weather={dayWeather} />
+                    <DayList index={cellIndex++} weather={dayWeather} updateDetailedList={this.props.updateDetailedList}/>
                   </TableCell>
                 );
               })}
             </TableRow>
           </TableBody>
         </Table>
-        <DetailedList weather={this.props.weatherList[0]} />
+        <DetailedList weather={this.props.weatherList[this.props.detailIndex]} />
       </div>
     );
   }

@@ -10,6 +10,10 @@ const styles = theme => ({
         width: '100%',
         maxWidth: 360,
         backgroundColor: theme.palette.background.paper,
+        '&:hover': {
+            backgroundColor: '#d3d3d3', //Light grey
+            cursor: 'pointer',
+        }
     },
 });
 
@@ -21,13 +25,22 @@ class DayList extends React.Component {
     render() {
         const { classes } = this.props;
 
+        const dateString = this.props.weather.date + " " + this.props.weather.month;
+        const tempString = this.props.weather.temp + " °C"
+
         return (
-            <List className={classes.root}>
+            <List className={classes.root} onClick={() => this.props.updateDetailedList(this.props.index)}>
                 <ListItem>
                     <ListItemText primary={this.props.weather.day} />
                 </ListItem>
                 <ListItem>
-                    <ListItemText primary="Tomorrow" />
+                    <ListItemText primary={dateString} />
+                </ListItem>
+                <ListItem>
+                    <ListItemText primary={tempString} />
+                </ListItem>
+                <ListItem>
+                    <ListItemText primary={this.props.weather.main} />
                 </ListItem>
             </List>
         );

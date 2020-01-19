@@ -42,6 +42,8 @@ const styles = theme => ({
   },
 });
 
+const defaultCityId = 2193733; //Auckland
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -70,8 +72,17 @@ class App extends Component {
       ],
       cityNamesForSuggestion: [],
       cityNameEntered: "",
-      invalid: false,
+      invalid: false,   
+      detailIndex: 0, //Which day was selected to show more details
     }
+  }
+
+
+  updateDetailedList = (index) => {
+    console.log(index);
+    this.setState({
+      detailIndex: index
+    });
   }
 
   loadCityNames() {
@@ -95,6 +106,7 @@ class App extends Component {
 
   componentDidMount() {
     this.loadCityNames();
+    this.setFiveDayWeatherListWithId(defaultCityId);
   }
 
   handleNameEntry = (name) => {
@@ -103,15 +115,18 @@ class App extends Component {
   }
 
   handleGetWeather = () => {
-
-    let currentComponent = this;
-
     var id = this.getCityIdByName(this.state.cityNameEntered);
     if (id === -1) {
       this.setState({ invalid: true });
       return;
     }
     //Now call the API with city ID
+
+    this.setFiveDayWeatherListWithId(id);
+  }
+
+  setFiveDayWeatherListWithId = (id) => {
+    let currentComponent = this;
 
     API.getWeatherForId(id).then(function (weatherResponse) {
       let timezone = weatherResponse.city.timezone;
@@ -127,11 +142,11 @@ class App extends Component {
         return currentComponent.simplifyWeatherData(detailedWeatherForDay, timezone, minTemp, maxTemp);
       })
 
-      console.log(fiveDayWeatherList);
       currentComponent.setState({
         invalid: false,
-        name: weatherResponse.city.name + "," + weatherResponse.city.country,
+        name: weatherResponse.city.name + ", " + weatherResponse.city.country,
         weatherList: fiveDayWeatherList,
+        detailIndex: 0,
       })
     });
   }
@@ -204,7 +219,7 @@ class App extends Component {
 
 
         <div className={classes.toolbar} />
-        <h1 className={classes.pStyle}>Five Day Weather Forecast For Any City</h1>
+        <h1 className={classes.pStyle}>Five Day Weather Forecast</h1>
         <div className={classes.tableContainer}>
           <Paper style={{ margin: "5%" }} >
             <Grid container spacing={0}>
@@ -228,7 +243,12 @@ class App extends Component {
             </Grid>
 
 
-            <WeatherTable weatherList={this.state.weatherList} />
+            <WeatherTable 
+              weatherList={this.state.weatherList} 
+              cityName={this.state.name} 
+              updateDetailedList={this.updateDetailedList} 
+              detailIndex={this.state.detailIndex}
+            />
           </Paper >
         </div>
       </div>
